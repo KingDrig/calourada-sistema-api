@@ -54,8 +54,17 @@ def log_secao(titulo):
 # DADOS DE TESTE
 # ============================================================
 
-# CPF válido para teste (gerado automaticamente)
-CPF_TESTE = "529.982.247-25"  # CPF válido do IBGE para testes
+import random
+
+def gerar_cpf_valido():
+    cpf = [random.randint(0, 9) for _ in range(9)]
+    for i in range(9, 11):
+        val = sum((i + 1 - j) * cpf[j] for j in range(i))
+        d = (val * 10) % 11
+        cpf.append(d if d < 10 else 0)
+    return f"{cpf[0]}{cpf[1]}{cpf[2]}.{cpf[3]}{cpf[4]}{cpf[5]}.{cpf[6]}{cpf[7]}{cpf[8]}-{cpf[9]}{cpf[10]}"
+
+CPF_TESTE = gerar_cpf_valido()
 
 USUARIO_COMUM = {
     "username": f"usuario_teste_{int(time.time())}",

@@ -35,7 +35,7 @@ class PedidoViewSet(viewsets.ModelViewSet):
         return PedidoSerializer
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
+        if self.action in ['list', 'retrieve', 'create']:
             return [permissions.IsAuthenticated()]
         return [IsAdminUser()]
 
