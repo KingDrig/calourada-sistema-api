@@ -1,0 +1,23 @@
+{{ evento.nome }}
+==================
+
+Olá, {{ usuario.get_full_name|default:usuario.username }}!
+
+Seu ingresso foi confirmado! Apresente o QR Code na entrada do evento.
+
+DETALHES DO INGRESSO
+---------------------
+Tipo: {{ ingresso.get_tipo_display }}
+Data: {{ evento.data_evento|date:"d/m/Y H:i" }}
+Local: {{ evento.local }}
+Código: {{ ingresso.uuid }}
+
+IMPORTANTE
+----------
+- Apresente este e-mail ou o QR Code no momento da entrada
+- Cada QR Code pode ser utilizado apenas uma vez
+- Chegue com antecedência para evitar filas
+
+---
+Este é um e-mail automático.
+© {{ base_url|default:"Centro Acadêmico" }}

@@ -1,0 +1,134 @@
+# ============================================================
+# GUIA RÁPIDO - RODAR O SISTEMA DE INGRESSOS
+# ============================================================
+
+# ATENÇÃO: Execute os comandos na ordem!
+
+# ----------------------------------------------------------
+# OPÇÃO 1: USANDO DOCKER (RECOMENDADO)
+# ----------------------------------------------------------
+
+# 1. Subir todos os serviços (Django, PostgreSQL, Redis, Celery)
+docker-compose up -d
+
+# 2. Verificar logs (opcional)
+docker-compose logs -f
+
+# 3. Criar superusuário admin (execute quando o banco estiver pronto)
+docker-compose exec web python manage.py shell <<EOF
+from apps.accounts.models import Usuario
+Usuario.objects.create_superuser(
+    username='admin',
+    email='admin@centroacademico.com',
+    password='admin123',
+    cpf='529.982.247-25'
+)
+print("Admin criado!")
+EOF
+
+# 4. Abrir no navegador:
+# - API: http://localhost:8000/api/docs/
+# - Admin: http://localhost:8000/admin/
+
+# ----------------------------------------------------------
+# OPÇÃO 2: EXECUÇÃO MANUAL (SEM DOCKER)
+# ----------------------------------------------------------
+
+# 1. Criar ambiente virtual
+python -m venv venv
+
+# 2. Ativar virtualenv
+# Linux/Mac:
+source venv/bin/activate
+# Windows:
+# venv\Scripts\activate
+
+# 3. Instalar dependências
+pip install -r requirements.txt
+
+# 4. Configurar variáveis de ambiente
+# Copie .env.example para .env e configure se necessário
+
+# 5. Criar banco PostgreSQL
+# Acesse o psql e execute:
+# CREATE DATABASE financeiro_db;
+# CREATE USER financeiro_user WITH PASSWORD 'financeiro_password';
+# GRANT ALL PRIVILEGES ON DATABASE financeiro_db TO financeiro_user;
+
+# 6. Rodar migrations
+python manage.py migrate
+
+# 7. Criar superusuário
+python manage.py createsuperuser
+# Ou via shell:
+python manage.py shell <<EOF
+from apps.accounts.models import Usuario
+Usuario.objects.create_superuser(
+    username='admin',
+    email='admin@centroacademico.com',
+    password='admin123',
+    cpf='529.982.247-25'
+)
+print("Admin criado!")
+EOF
+
+# 8. Iniciar Redis (em outro terminal)
+redis-server
+
+# 9. Iniciar servidor Django (em outro terminal)
+python manage.py runserver
+
+# 10. Iniciar Celery Worker (em outro terminal)
+celery -A config worker -l INFO
+
+# 11. Iniciar Celery Beat (em outro terminal, opcional)
+celery -A config beat -l INFO
+
+# ----------------------------------------------------------
+# RODAR O SCRIPT DE TESTE
+# ----------------------------------------------------------
+
+# 1. Com o servidor rodando, execute:
+python testar_fluxo_completo.py
+
+# ----------------------------------------------------------
+# DOCUMENTAÇÃO DA API (SWAGGER)
+# ----------------------------------------------------------
+
+# Acesse pelo navegador:
+http://localhost:8000/api/docs/
+
+# Você verá a interface do Swagger onde pode:
+# - Ver todos os endpoints
+# - Testar cada endpoint clicando em "Try it out"
+# - Fazer login diretamente na documentação
+
+# ----------------------------------------------------------
+# COMANDOS ÚTEIS DO DOCKER
+# ----------------------------------------------------------
+
+# Ver logs
+docker-compose logs -f web
+
+# Parar serviços
+docker-compose down
+
+# Rebuild (após mudanças no código)
+docker-compose up -d --build
+
+# Acessar shell do Django
+docker-compose exec web python manage.py shell
+
+# Verificar migrations pendentes
+docker-compose exec web python manage.py showmigrations
+
+# Criar migrations (após mudar models)
+docker-compose exec web python manage.py makemigrations
+docker-compose exec web python manage.py migrate
+
+# Reiniciar apenas o Django
+docker-compose restart web
+
+# ----------------------------------------------------------
+# FIM DO GUIA
+# ----------------------------------------------------------
