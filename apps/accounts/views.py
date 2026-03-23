@@ -22,11 +22,11 @@ class CustomTokenObtainPairView(TokenObtainPairView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        username = serializer.validated_data['username']
+        email = serializer.validated_data['email']
         password = serializer.validated_data['password']
 
         try:
-            user = Usuario.objects.get(username=username)
+            user = Usuario.objects.get(email=email)
             if user.check_password(password) and user.is_active:
                 refresh = RefreshToken.for_user(user)
                 return Response({

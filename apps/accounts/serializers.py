@@ -15,6 +15,7 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 
 class UsuarioCreateSerializer(serializers.ModelSerializer):
+    nome_completo = serializers.CharField(write_only=True, required=False)
     password = serializers.CharField(
         write_only=True,
         min_length=8,
@@ -22,6 +23,7 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
     )
     password_confirm = serializers.CharField(
         write_only=True,
+        required=False,
         style={'input_type': 'password'}
     )
 
@@ -30,7 +32,7 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
         fields = [
             'username', 'email', 'password', 'password_confirm',
             'first_name', 'last_name', 'telefone', 'cpf',
-            'curso', 'matricula'
+            'curso', 'matricula', 'nome_completo'
         ]
 
     def validate_cpf(self, value):
@@ -45,15 +47,35 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        if attrs.get('password') != attrs.get('password_confirm'):
+        nome_completo = attrs.get('nome_completo')
+        password_confirm = attrs.get('password_confirm')
+        
+        if nome_completo:
+            partes = nome_completo.strip().split(' ')
+            attrs['first_name'] = partes[0]
+            attrs['last_name'] = ' '.join(partes[1:]) if len(partes) > 1 else ''
+        
+        if password_confirm and attrs.get('password') != password_confirm:
             raise serializers.ValidationError({
                 'password_confirm': 'As senhas não coincidem.'
             })
+        
+        if not attrs.get('username'):
+            base_username = attrs.get('email', '').split('@')[0]
+            username = base_username
+            counter = 1
+            while Usuario.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            attrs['username'] = username
+        
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop('password_confirm')
+        validated_data.pop('password_confirm', None)
+        validated_data.pop('nome_completo', None)
         password = validated_data.pop('password')
+        
         user = Usuario(**validated_data)
         user.set_password(password)
         user.save()
@@ -61,7 +83,7 @@ class UsuarioCreateSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True, style={'input_type': 'password'})
 
 

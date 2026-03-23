@@ -745,4 +745,15 @@ django-celery-email==3.0.0
 
 ================================================================================
 STATUS DO PROJETO: ✅ COMPLETO E FUNCIONANDO
+
 ================================================================================
+📝 ATUALIZAÇÕES RECENTES (23/03/2026)
+================================================================================
+
+- ✅ Integração completa de login JWT (simplejwt)
+- ✅ Sistema de autenticação com refresh tokens
+- ✅ Fluxo de checkout com validação de documentos
+- ✅ Integração real com Mercado Pago SDK
+- ✅ Migrations aplicadas e funcionando (5 apps)
+- ✅ Remoção de mocks - API conectada ao banco real
+- ✅ Backend pronto para produção com Docker Compose
